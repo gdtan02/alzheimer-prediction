@@ -3,8 +3,7 @@ import {
     signInWithEmailAndPassword,
     signOut,
     GoogleAuthProvider,
-    signInWithPopup,
-    updateCurrentUser
+    signInWithPopup
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/config/firebase";
@@ -52,6 +51,31 @@ export const AuthService = {
             return userCredential.user;
         } catch (error) {
             console.log("Registration error: ", error)
+            throw error;
+        }
+    },
+
+    async loginWithGoogle() {
+        try {
+            const provider = new GoogleAuthProvider();
+            const userCredential = await signInWithPopup(auth, provider);
+
+            // Check if user exists in Firestore
+            const userDocRef = doc(db, "users", userCredential.user.uid);
+            const userSnapshot = await getDoc(userDocRef);
+
+            // Create new doc if user does not exist
+            if (!userSnapshot.exists()) {
+                await setDoc(userDocRef, {
+                    name: userCredential.user.displayName,
+                    email: userCredential.user.email,
+                    createdAt: serverTimestamp()
+                });
+            }
+
+            return userCredential.user;
+        } catch (error) {
+            console.log("Login with Google error: ", error)
             throw error;
         }
     },
