@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react";
 import { User } from "firebase/auth";
+import { createContext, useContext } from "react";
 
 interface AuthStore {
     currentUser: User | null;    // Store current logged in user

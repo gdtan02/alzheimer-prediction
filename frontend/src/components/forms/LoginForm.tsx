@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,6 +9,11 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { FormLabel } from "../ui/form";
 import { Input } from "../ui/input";
+import { useState } from "react";
+import { AuthService } from "@/services/authService";
+import { toast } from "sonner";
+import { auth } from "@/config/firebase";
+import { updateCurrentUser } from "firebase/auth";
 
 
 const formSchema = z.object({
@@ -16,11 +22,12 @@ const formSchema = z.object({
         .email({ message: "Invalid email address." }),
     password: z.string()
         .nonempty({message: "Password should not be empty."})
-        .min(8, { message: "Password should be at least 8 characters long." })
-        .regex(/[a-zA-Z0-9]/, { message: "Password should be alphanumeric." }),
 });
 
 const LoginForm = () => {
+
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -31,7 +38,37 @@ const LoginForm = () => {
     })
 
     const submitForm = async (values: z.infer<typeof formSchema>) => {
-        console.log("Submit Login: ", values)
+        setIsLoading(true);
+
+        try {
+            const user = await AuthService.loginWithEmailAndPassword({
+                email: values.email,
+                password: values.password
+            });
+            console.log("user id: ", user.uid);
+
+            if (user) { updateCurrentUser(auth, user); };
+            
+            toast.success("Login Successful", {
+                description: "Welcome to Alzheimer Prediction App!"
+            });
+
+            navigate("/dashboard");
+
+        } catch (error: any) {
+            console.log(error.message)
+            toast.error("Login Failed", {
+                description: error.message || "An error occurred during login."
+            });
+            updateCurrentUser(auth, null);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const handleGoogleLogin = async () => {
+        setIsLoading(true);
+        console.log("Google Login");
     }
 
     return (
@@ -69,8 +106,8 @@ const LoginForm = () => {
                                         </FormItem>
                                     )}
                                     />
-                                    <Button type="submit" className="w-full">Login</Button>
-                                    <Button variant="outline" className="w-full">
+                                    <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Logging in..." : "Login"}</Button>
+                                    <Button variant="outline" className="w-full" disabled={isLoading} onClick={handleGoogleLogin}>
                                         Login with Google
                                     </Button>
                                 </div>
