@@ -1,26 +1,31 @@
-import { useAuth } from "@/stores/authStore";
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertTitle, AlertDescription } from "./ui/alert";
+import { useAuth } from "@/stores/authStore";
+import { toast } from "sonner";
 
 // A wrapper component to restrict unauthorized access 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => { 
     const navigate = useNavigate();
-    const { currentUser } = useAuth()
+    const { isAuthenticated } = useAuth()
 
     useEffect(() => {
 
-        if (!currentUser) {
+        if (!isAuthenticated) {
+
+            toast.error("Unauthorized Access", {
+                description: "Please login to the system first.",
+            });
 
             // Automatically navigate
             const timer = setTimeout(() => { navigate("/") }, 2000);
-
+            
             return () => clearTimeout(timer);
         };
     })
 
 
-    if (!currentUser) {
+    if (!isAuthenticated) {
         return (
             <div className="flex min-h-svh w-full items-center justify-center">
                 <div className="w-full max-w-sm">
