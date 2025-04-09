@@ -6,8 +6,9 @@ import DashboardPage from './pages/DashboardPage';
 import ProtectedRoute from "./components/ProtectedRoute";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./config/firebase";
-import { useAuth } from "./stores/auth_store";
+import { useAuth } from "./stores/authStore";
 import { ThemeProvider } from "./components/ThemeProvider";
+import { Toaster } from "./components/ui/sonner";
 
 function App() { 
 
@@ -39,7 +40,8 @@ function App() {
 
   return (
     <ThemeProvider>
-      <RouterProvider router={router}></RouterProvider>
+      <Toaster />
+        {<RouterProvider router={router}></RouterProvider>}
     </ThemeProvider>
   )
 };

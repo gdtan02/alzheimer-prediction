@@ -1,4 +1,5 @@
-import { Link } from "react-router-dom";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -7,6 +8,9 @@ import { Form, FormControl, FormField, FormMessage, FormItem, FormLabel } from "
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
+import { useState } from "react";
+import { AuthService } from "@/services/authService";
+import { toast } from "sonner";
 
 const formSchema = z.object({
     name: z.string()
@@ -29,6 +33,9 @@ const formSchema = z.object({
 
 const RegisterForm = () => {
 
+    const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(false);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -40,7 +47,27 @@ const RegisterForm = () => {
     });
 
     const submitForm = async (values: z.infer<typeof formSchema>) => {
-        console.log("Registered successfully: ", values)
+        setIsLoading(true);
+        try {
+            await AuthService.registerNewUser({
+                name: values.name,
+                email: values.email,
+                password: values.password
+            });
+
+            toast.success("Registration successful", {
+                description: "Your account has been created successfully!"
+            })
+
+            navigate("/");
+        } catch (error: any) {
+            console.log(error.message)
+            toast.error("Registration failed", {
+                description: error.message || "An error occurred during registration"
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -100,7 +127,7 @@ const RegisterForm = () => {
                                     )}
                                     />
 
-                                    <Button type="submit" className="w-full">Create Account</Button>
+                                    <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? "Creating account..." : "Create Account"}</Button>
                                     <div className="mt-4 text-center text-sm">
                                         Already have an account?{" "}
                                         <Link to="/login" className="underline">Login</Link>
