@@ -1,6 +1,5 @@
 import RegisterForm from "@/components/forms/RegisterForm";
 import NavBar from "@/components/NavBar";
-import React from "react";
 
 const SignUpPage = () => {
     return (
