@@ -26,7 +26,7 @@ const DashboardPage = () => {
                         <TabsContent value="manual-input" className="mt-6">
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Manual Patient Data Entry</CardTitle>
+                                    <CardTitle>Patient Data Entry</CardTitle>
                                     <CardDescription>
                                         Enter patient data manually for Alzheimer's prediction.
                                     </CardDescription>
@@ -50,6 +50,7 @@ const DashboardPage = () => {
                                                 />
                                             </div>
                                         </div>
+                                        
                                         
                                         <div className="flex justify-end gap-2">
                                             <Button 

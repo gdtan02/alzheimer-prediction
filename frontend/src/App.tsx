@@ -2,7 +2,6 @@ import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, N
 import LoginPage from './pages/LoginPage';
 import SignUpPage from './pages/SignUpPage';
 import DashboardPage from './pages/DashboardPage';
-import NavBar from "./components/NavBar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { ThemeProvider } from "./components/ThemeProvider";
 import { Toaster } from "./components/ui/sonner";

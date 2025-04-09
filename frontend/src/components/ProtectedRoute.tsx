@@ -13,7 +13,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
         if (!isAuthenticated) {
 
             // Automatically navigate
-            const timer = setTimeout(() => { navigate("/") }, 2000);
+            const timer = setTimeout(() => { navigate("/login") }, 2000);
 
             return () => clearTimeout(timer);
         };

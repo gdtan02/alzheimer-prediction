@@ -8,9 +8,10 @@ import { Form, FormControl, FormField, FormMessage, FormItem, FormLabel } from "
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthService } from "@/services/authService";
 import { toast } from "sonner";
+import { useAuth } from "@/stores/authStore";
 
 const formSchema = z.object({
     name: z.string()
@@ -35,6 +36,13 @@ const RegisterForm = () => {
 
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const { currentUser } = useAuth();
+
+    useEffect(() => {
+        if (currentUser) {
+            navigate("/dashboard");
+        }
+    }, [currentUser, navigate]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -59,7 +67,6 @@ const RegisterForm = () => {
                 description: "Your account has been created successfully!"
             })
 
-            navigate("/");
         } catch (error: any) {
             console.log(error.message)
             toast.error("Registration failed", {
@@ -67,6 +74,7 @@ const RegisterForm = () => {
             });
         } finally {
             setIsLoading(false);
+            navigate("/dashboard");
         }
     }
 

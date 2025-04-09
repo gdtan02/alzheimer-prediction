@@ -3,7 +3,8 @@ import {
     signInWithEmailAndPassword,
     signOut,
     GoogleAuthProvider,
-    signInWithPopup
+    signInWithPopup,
+    onAuthStateChanged
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/config/firebase";
@@ -40,6 +41,7 @@ export const AuthService = {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log(userCredential)
 
+    
             if (userCredential) {
                 await setDoc(doc(db, "users", userCredential.user.uid), {
                     name,

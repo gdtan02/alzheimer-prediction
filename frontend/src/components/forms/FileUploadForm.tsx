@@ -35,10 +35,15 @@ const FileUploadForm = () => {
         resolver: zodResolver(formSchema),
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values)
         setIsGenerating(true)
+
+        // To Be Implemented
+        await new Promise( f => setTimeout(f, 2000));   // Placeholder
+
         setIsResultGenerated(true)
+        setIsGenerating(false)
     }
 
     function displayResult() {
@@ -108,14 +113,14 @@ const FileUploadForm = () => {
                             <div className="flex flex-col gap-4 py-4">
                                 <div className="flex justify-end gap-2">
                                     <Button 
-                                    disabled={(!isUploaded) || (!isGenerating)}
+                                    disabled={(isGenerating) || (!isUploaded)}
                                     type="submit"
                                     >
                                     {isGenerating ? "Generating..." : "Generate Prediction" }
                                     </Button>
                                     <Button 
-                                    variant="secondary"
-                                    disabled={(!isUploaded) || (!isResultGenerated)}
+                                    variant="secondary" type="button"
+                                    disabled={(!isResultGenerated)}
                                     onClick={displayResult}
                                     >
                                         View Results
