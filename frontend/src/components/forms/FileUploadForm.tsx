@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui
 import { Form, FormControl, FormField, FormItem, FormMessage } from "../ui/form";
 import { CloudUpload, Paperclip } from "lucide-react";
 import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from "../ui/file-upload";
-import ResultDialog from "../ResultDialog";
+import TrainResultDialog from "../TrainResultDialog";
 import { MOCK_RESULTS } from "@/services/predictionService";
 
 const formSchema = z.object({
@@ -130,7 +130,7 @@ const FileUploadForm = () => {
                         </form>
                     </Form> 
                 </CardContent>
-            <ResultDialog isOpen={isResultDialogOpen} onOpenChange={setIsResultDialogOpen} result={MOCK_RESULTS}
+            <TrainResultDialog isOpen={isResultDialogOpen} onOpenChange={setIsResultDialogOpen} result={MOCK_RESULTS}
             />
             </Card>
 
