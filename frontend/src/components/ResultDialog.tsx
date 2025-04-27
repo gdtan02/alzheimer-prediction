@@ -87,7 +87,7 @@ const ResultDialog: React.FC<ResultsDialogProps> = ({ isOpen, onOpenChange, resu
                 <DialogContent className="sm:max-w-[100vh] max-h-[90vh]">
                     
                     <DialogHeader className="flex-shrink-0">
-                        <DialogTitle>Prediction Results</DialogTitle>
+                        <DialogTitle>Model Training Results</DialogTitle>
                     </DialogHeader>
 
                     <ScrollArea className="max-h-[80vh]">    
