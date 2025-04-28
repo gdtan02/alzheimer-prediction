@@ -3,8 +3,7 @@ import {
     signInWithEmailAndPassword,
     signOut,
     GoogleAuthProvider,
-    signInWithPopup,
-    onAuthStateChanged
+    signInWithPopup
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "@/config/firebase";
@@ -18,6 +17,7 @@ interface RegisterNewUserCredentials {
     name: string;
     email: string;
     password: string;
+    role?: "admin" | "clinician";
 }
 
 
@@ -36,7 +36,7 @@ export const AuthService = {
     },
 
     // Register new user
-    async registerNewUser({ name, email, password }: RegisterNewUserCredentials) {
+    async registerNewUser({ name, email, password, role = "clinician" }: RegisterNewUserCredentials) {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log(userCredential)
@@ -46,6 +46,7 @@ export const AuthService = {
                 await setDoc(doc(db, "users", userCredential.user.uid), {
                     name,
                     email,
+                    role,
                     createdAt: serverTimestamp()
                 });
             };
@@ -88,6 +89,20 @@ export const AuthService = {
             await signOut(auth);
         } catch (error) {
             console.log("Sign out error: ", error)
+            throw error;
+        }
+    },
+
+    // Get user role
+    async getUserRole(userId: string) {
+        try {
+            const userDoc = await getDoc(doc(db, "users", userId));
+            console.log("Current user: ", userDoc.data())
+            if (userDoc.exists()) {
+                return userDoc.data().role || "clinician";
+            }
+        } catch (error) {
+            console.log("Get user role error: ", error);
             throw error;
         }
     }

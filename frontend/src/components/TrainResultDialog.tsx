@@ -3,14 +3,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts"
-import { PredictionResult } from "@/services/predictionService";
+import { TrainingResult } from "@/services/predictionService";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
 
 interface TrainResultsDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  result: PredictionResult | null;
+  result: TrainingResult | null;
 }
 
 const chartConfig = {
