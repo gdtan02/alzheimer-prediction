@@ -7,6 +7,20 @@ export interface ModelMetrics {
 }
 
 // Prediction results
+export interface TrainingResult {
+    id?: string;
+    userId: string;
+    filename: string;
+    status: "processing" | "completed" | "failed";
+    models: {
+        svm: ModelMetrics;
+        naiveBayes: ModelMetrics;
+        decisionTree: ModelMetrics;
+    };
+    bestModel: "svm" | "naiveBayes" | "decisionTree";
+    errorMessage?: string;
+}
+
 export interface PredictionResult {
     id?: string;
     userId: string;
@@ -22,7 +36,7 @@ export interface PredictionResult {
 }
 
 // Mock data for demonstration purposes
-export const MOCK_RESULTS: PredictionResult = {
+export const MOCK_RESULTS: TrainingResult = {
   userId: '',
   filename: '',
   status: 'completed',
