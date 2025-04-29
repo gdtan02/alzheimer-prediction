@@ -1,5 +1,6 @@
 import DatasetUploadForm from "@/components/forms/DatasetUploadForm";
 import ModelTrainingForm from "@/components/forms/ModelTrainingForm";
+import PatientEntryForm from "@/components/forms/PatientEntryForm";
 import NavBar from "@/components/NavBar";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -27,13 +28,11 @@ const DashboardPage = () => {
                         <TabsContent value="model-training" className="mt-6">
                             <ModelTrainingForm />
                         </TabsContent>
-
                         <TabsContent value="csv-upload" className="mt-6">
                             <DatasetUploadForm />
                         </TabsContent>
-                        
                         <TabsContent value="manual-input" className="mt-6">
-                            
+                            <PatientEntryForm />
                         </TabsContent>
                     </Tabs>
                 </div>
