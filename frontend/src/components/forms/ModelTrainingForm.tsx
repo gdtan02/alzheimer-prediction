@@ -43,7 +43,8 @@ const ModelTrainingForm = () => {
 
         // To Be Implemented
         await new Promise(f => setTimeout(f, 2000));   // Placeholder
-
+        
+        setTrainingResult(MOCK_RESULTS)
         setIsTraining(false)
     }
 

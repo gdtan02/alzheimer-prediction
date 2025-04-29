@@ -84,7 +84,7 @@ const TrainResultDialog: React.FC<TrainResultsDialogProps> = ({ isOpen, onOpenCh
         return (
             <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 {/* Results generated */}
-                <DialogContent className="sm:max-w-[100vh] max-h-[90vh]">
+                <DialogContent className="sm:max-w-[130vh] max-h-[90vh]">
                     
                     <DialogHeader className="flex-shrink-0">
                         <DialogTitle>Model Training Results</DialogTitle>
