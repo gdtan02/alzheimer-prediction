@@ -3,32 +3,32 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts"
-import { PredictionResult } from "@/services/predictionService";
+import { TrainingResult } from "@/services/predictionService";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
 
-interface ResultsDialogProps {
+interface TrainResultsDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  result: PredictionResult | null;
+  result: TrainingResult | null;
 }
 
 const chartConfig = {
     svm: {
         label: "SVM",
-        color: "#ca8a04",
+        color: "#16a34a",
     },
     naiveBayes: {
         label: "Naïve Bayes",
-        color: "#eab308",
+        color: "#4ade80",
     },
     decisionTree: {
         label: "Decision Tree",
-        color: "#facc15"
+        color: "#bbf7d0"
     }
 } satisfies ChartConfig;
 
-const ResultDialog: React.FC<ResultsDialogProps> = ({ isOpen, onOpenChange, result }) => {
+const TrainResultDialog: React.FC<TrainResultsDialogProps> = ({ isOpen, onOpenChange, result }) => {
 
     // Prepare data for the chart
     const prepareChartData = () => {
@@ -84,10 +84,10 @@ const ResultDialog: React.FC<ResultsDialogProps> = ({ isOpen, onOpenChange, resu
         return (
             <Dialog open={isOpen} onOpenChange={onOpenChange}>
                 {/* Results generated */}
-                <DialogContent className="sm:max-w-[100vh] max-h-[90vh]">
+                <DialogContent className="sm:max-w-[130vh] max-h-[90vh]">
                     
                     <DialogHeader className="flex-shrink-0">
-                        <DialogTitle>Prediction Results</DialogTitle>
+                        <DialogTitle>Model Training Results</DialogTitle>
                     </DialogHeader>
 
                     <ScrollArea className="max-h-[80vh]">    
@@ -176,4 +176,4 @@ const ResultDialog: React.FC<ResultsDialogProps> = ({ isOpen, onOpenChange, resu
 
 }
 
-export default ResultDialog;
+export default TrainResultDialog;
