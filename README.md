@@ -1,7 +1,9 @@
 # alzheimer-prediction
 
 ============================
-Project Update (2025-04-30):
+
+## Project Update (2025-04-30):
+
 ============================
 1. Model Script
    * Include Pipeline and ColumnTransformer to fix the data leakage issue, streamlining the data preprocessing and model training process and reduce code duplication.
