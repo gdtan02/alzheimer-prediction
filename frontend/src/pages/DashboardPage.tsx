@@ -2,9 +2,6 @@ import DatasetUploadForm from "@/components/forms/DatasetUploadForm";
 import ModelTrainingForm from "@/components/forms/ModelTrainingForm";
 import PatientEntryForm from "@/components/forms/PatientEntryForm";
 import NavBar from "@/components/NavBar";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/stores/authStore";
 

@@ -55,7 +55,6 @@ type FormValues = z.infer<typeof formSchema>;
 const PatientEntryForm = () => {
 
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
-    const [isResultDialogOpen, setIsResultDialogOpen] = useState<boolean>(false);
     const [predictionResult, setPredictionResult] = useState<PredictionResult | null>(null);
 
     const form = useForm<FormValues>({
@@ -80,6 +79,8 @@ const PatientEntryForm = () => {
 
         // To Be Implemented
         await new Promise( f => setTimeout(f, 2000));   // Placeholder
+
+        console.log("Form values: ", values)
 
         setPredictionResult(MOCK_PREDICTION_RESULTS[0])
         setIsGenerating(false)
