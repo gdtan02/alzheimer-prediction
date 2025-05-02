@@ -1,4 +1,5 @@
 import { auth } from "@/config/firebase";
+import Papa from "papaparse";
 
 // API Base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http:localhost:5000/api';
@@ -141,11 +142,35 @@ export const PredictionService = {
   async validateCsvFile(file: File): Promise<boolean> {
     try {
       return new Promise((resolve, reject) => {
-        
-      })
+        Papa.parse(file, {
+          header: true,
+          preview: 5,
+          complete: (results) => {
+            try {
+              // Get headers
+              const headers = results.meta.fields || [];
+
+              // Check required fields for patient data
+              const requiredFields = [
+                'birthyr', 'sex', 'educ', 'udsbentc', 'mocatrai', 'amndem', 'naccppag', 'amylpet', 'dysill', 'dysillif'
+              ];
+
+              // Check if all required fields are present
+              const hasAllRequiredFields = requiredFields.every(field => headers.includes(field));
+
+              resolve(hasAllRequiredFields);
+            } catch (err) {
+              reject(err);
+            }
+          }
+        });
+      });
+    } catch (error) {
+      console.log("Validation error: ", error)
+      throw error;
     }
   }
-}
+};
 
 
 // Mock data for demonstration purposes
