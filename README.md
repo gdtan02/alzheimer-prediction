@@ -1,5 +1,31 @@
 # alzheimer-prediction
 
+## Project Update (2025-04-30):
+
+1. Model Script
+   * Include Pipeline and ColumnTransformer to fix the data leakage issue, streamlining the data preprocessing and model training process and reduce code duplication.
+   * Separate the scripts of data cleaning, split the dataset into training and testing set before performing data transformation.
+   * Minor changes on data visualization & EDA parts. (To be done)
+   * Hyperparameter optimization using GridSearch or RandomizedSearch. (To be done)
+  
+2. UI Changes
+   * Add new Section "Model Training" into the Dashboard page. (Please log in using admin account in order to view it)
+   * Complete the UI for the Prediction Results Dialog ("Table" done, "Analysis" still pending, as we will discuss what are the visualizations needed to display)
+   * Complete the UI for "Patient Entry Form" and result display.
+   * Update on UI and add app icon.
+  
+   * *Note: The results shown in the Results Dialog are just mock responses for illustration purpose only, do not reflect the real prediction results.*
+  
+3. Functionalities Update:
+   * Added "Admin" role to the system.
+   * Some minor bug fixes.
+
+TO BE DONE:
+1. The full integration of the prediction model to the system (including the backend).
+2. The "Analysis" tab in the Prediction Results Dialog.
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Just some quick notes:
 
