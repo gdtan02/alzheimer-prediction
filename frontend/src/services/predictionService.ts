@@ -143,16 +143,17 @@ export const PredictionService = {
     try {
       return new Promise((resolve, reject) => {
         Papa.parse(file, {
-          header: true,
-          preview: 5,
+          preview: 2,
           complete: (results) => {
             try {
-              // Get headers
-              const headers = results.meta.fields || [];
+
+              const data = results.data.slice(1);  // Skip firs trow
+
+              const headers = data[0] ? Object.values(data[0]) : [];
 
               // Check required fields for patient data
               const requiredFields = [
-                'birthyr', 'sex', 'educ', 'udsbentc', 'mocatrai', 'amndem', 'naccppag', 'amylpet', 'dysill', 'dysillif'
+                'BIRTHYR', 'SEX', 'EDUC', 'UDSBENTC', 'MOCATRAI', 'AMNDEM', 'NACCPPAG', 'AMYLPET', 'DYSILL', 'DYSILLIF'
               ];
 
               // Check if all required fields are present
