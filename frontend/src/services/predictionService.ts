@@ -2,7 +2,7 @@ import { auth } from "@/config/firebase";
 import Papa from "papaparse";
 
 // API Base URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http:localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 // Model performance metrics
 export interface ModelMetrics {
@@ -73,7 +73,9 @@ export const PredictionService = {
         throw new Error(error.message || "Failed to train models.");
       }
 
-      return await response.json();
+      const results = await response.json();
+
+      return results.data;
     } catch (error) {
       console.log("Training error: ", error);
       throw error;
