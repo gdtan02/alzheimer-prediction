@@ -81,14 +81,15 @@ const ModelTrainingForm = () => {
 
         try {
             // Validate CSV structure
-            const isValid = await PredictionService.validateCsvFile(file);
+            const isValid = await PredictionService.validateCsvFile(file, true);
 
             if (!isValid) {
-                toast.error("Invalid CSV format. The file must contain all the required fields.");  
+                toast.error("Invalid CSV format. The file must contain all the required fields including labels.");  
                 setIsTraining(false);
                 return;
             }
 
+            // Call prediction service
             const result = await PredictionService.trainModel(file);
 
             console.log("results=", result)

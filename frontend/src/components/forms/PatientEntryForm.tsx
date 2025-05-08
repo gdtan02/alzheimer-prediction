@@ -8,9 +8,10 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
-import { MOCK_PREDICTION_RESULTS, PredictionResult } from "@/services/predictionService";
+import { PatientData, PredictionResult, PredictionService } from "@/services/predictionService";
 import { Badge } from "../ui/badge";
 import { CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 // Current year
 const currentYear = new Date().getFullYear();
@@ -77,13 +78,25 @@ const PatientEntryForm = () => {
 
         setIsGenerating(true);
 
-        // To Be Implemented
-        await new Promise( f => setTimeout(f, 2000));   // Placeholder
+        try {
+            // Transform form values into patient data
+            const patientData: PatientData = {
+                ...values
+            };
+            console.log("patient data=", patientData)
 
-        console.log("Form values: ", values)
+            // Call prediction service
+            const result = await PredictionService.predictSinglePatient(patientData);
+            setPredictionResult(result);
 
-        setPredictionResult(MOCK_PREDICTION_RESULTS[0])
-        setIsGenerating(false)
+        } catch (error) {
+            console.log("Prediction error: ", error);
+            toast.error("Failed to make predictions", {
+                description: error instanceof Error ? error.message : "Unknown error"
+            });
+        } finally {
+            setIsGenerating(false);
+        }
     }
 
 
