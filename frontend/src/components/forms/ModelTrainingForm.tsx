@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Form } from "../ui/form";
 
-import { MOCK_RESULTS, PredictionService, TrainingResult } from "@/services/predictionService";
+import { PredictionService, TrainingResult } from "@/services/predictionService";
 import TrainResultDialog from "../TrainResultDialog";
 import FileUploadSection from "../FileUploadSection";
 import { Button } from "../ui/button";
@@ -31,15 +31,15 @@ const ModelTrainingForm = () => {
     });
 
     const formatModelName = (model: string): string => {
-    switch (model) {
-        case "svm":
-            return "SVM Classifier";
-        case "naiveBayes":
-            return "Naïve Bayes Classifier";
-        case "decisionTree":
-            return "Decision Tree Classifier";
-        default:
-            return model;
+        switch (model) {
+            case "svm":
+                return "SVM Classifier";
+            case "naiveBayes":
+                return "Naïve Bayes Classifier";
+            case "decisionTree":
+                return "Decision Tree Classifier";
+            default:
+                return model;
         }
     };
 
@@ -81,15 +81,20 @@ const ModelTrainingForm = () => {
 
         try {
             // Validate CSV structure
-            const isValid = await PredictionService.validateCsvFile(file);
+            const isValid = await PredictionService.validateCsvFile(file, true);
 
             if (!isValid) {
-                toast.error("Invalid CSV format. The file must contain all the required fields.");  
+                toast.error("Invalid CSV format. The file must contain all the required fields including labels.");  
                 setIsTraining(false);
                 return;
             }
 
+            // Call prediction service
             const result = await PredictionService.trainModel(file);
+
+            console.log("results=", result)
+            console.log("best model=", result.bestModel)
+
             setTrainingResult(result);
 
             // Show success message
@@ -147,7 +152,7 @@ const ModelTrainingForm = () => {
             <TrainResultDialog
                 isOpen={isResultDialogOpen}
                 onOpenChange={setIsResultDialogOpen}
-                result={MOCK_RESULTS}
+                result={trainingResult}
             />
         </Card>
     );
