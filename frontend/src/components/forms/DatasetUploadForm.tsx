@@ -6,11 +6,11 @@ import { useForm } from "react-hook-form";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { Form } from "../ui/form";
 
-import { MOCK_PREDICTION_RESULTS, PredictionResult } from '@/services/predictionService';
-import TrainResultDialog from "../TrainResultDialog";
+import { PredictionResult, PredictionService } from '@/services/predictionService';
 import FileUploadSection from "../FileUploadSection";
 import { Button } from "../ui/button";
 import PredictionResultDialog from "../PredictionResultDialog";
+import { toast } from "sonner";
 
 const formSchema = z.object({
     datasetFile: z.string()
@@ -22,15 +22,32 @@ const DatasetUploadForm = () => {
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
     const [isResultDialogOpen, setIsResultDialogOpen] = useState<boolean>(false);
     const [predictionResult, setPredictionResult] = useState<PredictionResult[] | null>(null);
+    const [validationError, setValidationError] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
 
     function handleFileUpload(files: File[] | null) {
+
+        setValidationError(null);
+
         if (files && files.length > 0) {
             setFile(files[0]);
             setIsUploaded(true);
+
+            // Validate file format
+            const fileExt = files[0].name.split('.').pop()?.toLowerCase();
+            if (fileExt !== 'csv') {
+                setValidationError("Please upload a CSV file.");
+                return;
+            }
+
+            // Validate file size
+            if (files[0].size > 10 * 1024 * 1024) {
+                setValidationError("File size exceeds 10MB limit");
+                return;
+            }
         } else {
             setFile(null);
             setIsUploaded(false);
@@ -40,13 +57,39 @@ const DatasetUploadForm = () => {
     async function onSubmit() {
         if (!file) return;
 
+        if (validationError) {
+            toast.error(validationError);
+            return;
+        }
+
         setIsGenerating(true);
 
-        // To Be Implemented
-        await new Promise( f => setTimeout(f, 2000));   // Placeholder
+        try {
+            // Validate CSV structure
+            const isValid = await PredictionService.validateCsvFile(file, false);
 
-        setPredictionResult(MOCK_PREDICTION_RESULTS)
-        setIsGenerating(false)
+            if (!isValid) {
+                toast.error("Invalid CSV format. The file must contain all the required fields.");
+                setIsGenerating(false);
+                return;
+            }
+
+            const result = await PredictionService.predictFromCSV(file);
+
+            console.log("results=", result)
+
+            setPredictionResult(result);
+
+            // Show success message
+            toast.success("Predicted successfully. View the results in the table.");
+        } catch (error) {
+            console.log("Prediction error: ", error);
+            toast.error("Failed to make predictions", {
+                description: error instanceof Error ? error.message : "Unknown error"
+            });
+        } finally {
+            setIsGenerating(false);
+        }
     }
 
     return (
@@ -89,7 +132,7 @@ const DatasetUploadForm = () => {
             <PredictionResultDialog
                 isOpen={isResultDialogOpen}
                 onOpenChange={setIsResultDialogOpen}
-                results={MOCK_PREDICTION_RESULTS}
+                results={predictionResult}
             />
         </Card>        
     )
