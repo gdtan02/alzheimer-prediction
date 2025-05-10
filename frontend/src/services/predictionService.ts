@@ -1,5 +1,7 @@
 import { auth } from "@/config/firebase";
 import Papa from "papaparse";
+import { collection, addDoc, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "@/config/firebase";
 
 // API Base URL
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -35,29 +37,54 @@ export interface PredictionResult {
 
 // Patient data for single prediction
 export interface PatientData {
-  birthyr: number;
-  sex: string;
-  educ: number;
-  udsbentc: string;
-  mocatrai: string;
-  amndem: string;
-  naccppag: string;
-  amylpet: string;
-  dysill: string;
-  dysillif: string;
+  BIRTHYR: number;
+  SEX: number;
+  EDUC: number;
+  UDSBENTC: number;
+  MOCATRAI: number;
+  AMNDEM: number;
+  NACCPPAG: number;
+  AMYLPET: number;
+  DYSILL: number;
+  DYSILLIF: number;
 }
 
 export const PredictionService = {
 
+  // Fetch best model name from Firestore
+  async getBestModel(): Promise<string> {
+    try {
+      // Query Firestore for the user's model settings
+      const modelsRef = collection(db, 'models');
+      const q = query(
+        modelsRef,
+        orderBy('timestamp', 'desc'),
+        limit(1)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      if (!querySnapshot.empty) {
+        const doc = querySnapshot.docs[0];
+        const data = doc.data();
+        return data.bestModel || 'decisionTree'; // Default to decisionTree if not specified
+      }
+      
+      return 'decisionTree'; // Default model
+    } catch (error) {
+      console.error('Error getting best model:', error);
+      return 'decisionTree'; // Default model on error
+    }
+  },
+
   // Train model
   async trainModel(file: File): Promise<TrainingResult> {
     try {
+      // Get current user token
+      const token = await auth.currentUser?.getIdToken();
+
       // Create form data
       const formData = new FormData();
       formData.append('file', file);
-
-      // Get current user token
-      const token = await auth.currentUser?.getIdToken();
 
       // Make API request
       const response = await fetch(`${API_BASE_URL}/train`, {
@@ -75,6 +102,17 @@ export const PredictionService = {
 
       const results = await response.json();
 
+      // Save to Firestore
+      try {
+        await addDoc(collection(db, 'models', ), {
+          ...results.data,
+          timestamp: new Date()
+        });
+      } catch (firestoreError) {
+        console.error('Error saving to Firestore:', firestoreError);
+        // We don't throw here to avoid blocking the response to the user
+      }
+
       return results.data;
     } catch (error) {
       console.log("Training error: ", error);
@@ -85,9 +123,13 @@ export const PredictionService = {
   // Dataset upload - Predict from CSV
   async predictFromCSV(file: File): Promise<PredictionResult[]> {
     try {
+      // Get best model for this user
+      const bestModel = await this.getBestModel();
+
       // Create form data
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('modelName', bestModel);
 
       // Get current user token
       const token = await auth.currentUser?.getIdToken();
@@ -121,6 +163,14 @@ export const PredictionService = {
       // Get current user token
       const token = await auth.currentUser?.getIdToken();
 
+      // Get best model for this user
+      const bestModel = await this.getBestModel();
+
+      const requestData = {
+        ...patientData,
+        modelName: bestModel
+      }
+
       // Make API request
       const response = await fetch(`${API_BASE_URL}/predict/single`, {
         method: 'POST',
@@ -128,7 +178,7 @@ export const PredictionService = {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(patientData)
+        body: JSON.stringify(requestData)
       });
 
       if (!response.ok) {

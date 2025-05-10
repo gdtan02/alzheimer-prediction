@@ -5,6 +5,9 @@ class AlzheimersMLException(Exception):
 class DataValidationError(AlzheimersMLException):
     pass
 
+class DataPreprocessingError(AlzheimersMLException):
+    pass
+
 class ModelTrainingError(AlzheimersMLException):
     pass
 
