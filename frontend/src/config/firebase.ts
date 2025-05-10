@@ -11,7 +11,6 @@ const firebaseConfig = {
   messagingSenderId: "REPLACE_ME",
   appId: "REPLACE_ME"
 };
-/* REPLACE ME */
 
 const app = initializeApp(firebaseConfig);
 

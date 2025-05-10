@@ -6,8 +6,12 @@ import io
 from app.core.exceptions import ModelTrainingError, DataValidationError, PredictionError
 from app.pipeline import Predictor
 from app.schemas import TrainResult, Metrics, PredictionResult
+from app.services.prediction_service import PredictionService
 
 route_bp = Blueprint('router', __name__)
+
+# Create services
+prediction_service = PredictionService()
 
 @route_bp.route('/train', methods=["POST"])
 def train_models():
@@ -22,46 +26,19 @@ def train_models():
 
         try:
             filepath = io.StringIO(file.read().decode('utf-8'))
+            train_results = prediction_service.train_models(filepath)
+            
+            return jsonify({
+                "status": "success",
+                "data": train_results
+            }), 200
         
         except Exception as e:
+            print(f"ERROR: {str(e)}")
             return jsonify({
                 "status": "failed",
                 "error": str(e)
-        }), 400
-
-        # FIXME: Mock results only
-        train_results: TrainResult = TrainResult(
-            userId = "admin",
-            filename = file.name,
-            status = "completed",
-            models = {
-                "svm": Metrics(
-                    f1Score=0.942942,
-                    accuracy=0.952381,
-                    precision=0.934848,
-                    recall=0.952381
-                ),
-                "naiveBayes": Metrics(
-                    f1Score=0.766033,
-                    accuracy=0.756614,
-                    precision=0.858554,
-                    recall=0.756614
-                ),
-                "decisionTree": Metrics(
-                    f1Score=0.961434,
-                    accuracy=0.957672,
-                    precision=0.965769,
-                    recall=0.957672
-                )
-            },
-            bestModel="decisionTree"
-        )
-
-
-        return jsonify({
-            "status": "success",
-            "data": train_results.model_dump()
-        }), 200
+        }), 400  
     
     except ModelTrainingError as e:
         return jsonify({
@@ -94,32 +71,22 @@ def predict_batch():
         
         file = request.files["file"]
 
+        model_name = request.form.get("modelName", None)
+
         try:
             filepath = io.StringIO(file.read().decode("utf-8"))
+            prediction_results = prediction_service.predict_batch(filepath, model_name)
+
+            return jsonify({
+                "status": "success",
+                "data": prediction_results
+            })
 
         except Exception as e:
             return jsonify({
                 "status": "failed",
                 "error": str(e)
-            }), 400
-        
-        # FIXME: Mock results only
-        prediction_results: List[PredictionResult] = [
-            PredictionResult(NACCID="ID0412", NACCUDSD=1).model_dump(),
-            PredictionResult(NACCID="ID0523", NACCUDSD=2).model_dump(),
-            PredictionResult(NACCID="ID0634", NACCUDSD=3).model_dump(),
-            PredictionResult(NACCID="ID0745", NACCUDSD=1).model_dump(),
-            PredictionResult(NACCID="ID0856", NACCUDSD=2).model_dump(),
-            PredictionResult(NACCID="ID0967", NACCUDSD=4).model_dump(),
-            PredictionResult(NACCID="ID1078", NACCUDSD=2).model_dump(),
-            PredictionResult(NACCID="ID1189", NACCUDSD=1).model_dump(),
-            PredictionResult(NACCID="ID1290", NACCUDSD=3).model_dump()
-        ]
-
-        return jsonify({
-            "status": "success",
-            "data": prediction_results
-        })
+            }), 400      
 
     except PredictionError as e:
         return jsonify({
@@ -138,19 +105,16 @@ def predict_single_patient():
     """Predict for a single patient using form data"""
     try:
         patient_data = request.get_json()
-        print("data=", patient_data)
-
-        # Validate patient data
-
-        # Make prediction
-        predictor = Predictor()
-        # result = predictor.predict(patient_data)
-
-        prediction_result: PredictionResult = PredictionResult(NACCID="ID0412", NACCUDSD=1)
+        
+        model_name = None
+        if "modelName" in patient_data:
+            model_name = patient_data.pop("modelName")
+            
+        prediction_result = prediction_service.predict_single(patient_data, model_name)
 
         return jsonify({
             "status": "success",
-            "data": prediction_result.model_dump()
+            "data": prediction_result
         }), 200
 
     except PredictionError as e:

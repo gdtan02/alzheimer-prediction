@@ -81,8 +81,17 @@ const PatientEntryForm = () => {
         try {
             // Transform form values into patient data
             const patientData: PatientData = {
-                ...values
-            };
+                BIRTHYR: values.birthyr,
+                SEX: Number(values.sex),
+                EDUC: values.educ,
+                UDSBENTC: Number(values.udsbentc),
+                MOCATRAI: Number(values.mocatrai),
+                AMNDEM: Number(values.amndem),
+                NACCPPAG: Number(values.naccppag),
+                AMYLPET: Number(values.amylpet),
+                DYSILL: Number(values.dysill),
+                DYSILLIF: Number(values.dysillif)
+            }
             console.log("patient data=", patientData)
 
             // Call prediction service
@@ -95,7 +104,7 @@ const PatientEntryForm = () => {
                 description: error instanceof Error ? error.message : "Unknown error"
             });
         } finally {
-            setIsGenerating(false);
+            setIsGenerating(false)  ;
         }
     }
 
