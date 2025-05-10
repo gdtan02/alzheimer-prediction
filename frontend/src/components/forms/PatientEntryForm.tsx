@@ -100,9 +100,9 @@ const PatientEntryForm = () => {
 
         } catch (error) {
             console.log("Prediction error: ", error);
-            // toast.error("Failed to make predictions", {
-            //     description: error instanceof Error ? error.message : "Unknown error"
-            // });
+            toast.error("Failed to make predictions", {
+                description: error instanceof Error ? error.message : "Unknown error"
+            });
         } finally {
             setIsGenerating(false)  ;
         }
