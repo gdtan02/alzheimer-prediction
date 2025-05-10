@@ -18,4 +18,6 @@ class TrainResult(BaseModel):
 
 class PredictionResult(BaseModel):
     NACCID: str
+    AGE: int
+    SEX: int
     NACCUDSD: int
