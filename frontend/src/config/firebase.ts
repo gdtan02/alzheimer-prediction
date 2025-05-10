@@ -4,14 +4,13 @@ import { getFirestore } from "firebase/firestore";
 
 /* REPLACE ME */
 const firebaseConfig = {
-  apiKey: "REPLACE_ME",
-  authDomain: "REPLACE_ME",
-  projectId: "REPLACE_ME",
-  storageBucket: "REPLACE_ME",
-  messagingSenderId: "REPLACE_ME",
-  appId: "REPLACE_ME"
+  apiKey: "AIzaSyAJxr3RWiqeYiWSzHLvmXiwYNMZF5vNR3g",
+  authDomain: "alzheimer-prediction-web.firebaseapp.com",
+  projectId: "alzheimer-prediction-web",
+  storageBucket: "alzheimer-prediction-web.firebasestorage.app",
+  messagingSenderId: "33445577756",
+  appId: "1:33445577756:web:b114cc3967414779b30bd9"
 };
-/* REPLACE ME */
 
 const app = initializeApp(firebaseConfig);
 

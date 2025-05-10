@@ -81,8 +81,17 @@ const PatientEntryForm = () => {
         try {
             // Transform form values into patient data
             const patientData: PatientData = {
-                ...values
-            };
+                BIRTHYR: values.birthyr,
+                SEX: Number(values.sex),
+                EDUC: values.educ,
+                UDSBENTC: Number(values.udsbentc),
+                MOCATRAI: Number(values.mocatrai),
+                AMNDEM: Number(values.amndem),
+                NACCPPAG: Number(values.naccppag),
+                AMYLPET: Number(values.amylpet),
+                DYSILL: Number(values.dysill),
+                DYSILLIF: Number(values.dysillif)
+            }
             console.log("patient data=", patientData)
 
             // Call prediction service
@@ -91,11 +100,11 @@ const PatientEntryForm = () => {
 
         } catch (error) {
             console.log("Prediction error: ", error);
-            toast.error("Failed to make predictions", {
-                description: error instanceof Error ? error.message : "Unknown error"
-            });
+            // toast.error("Failed to make predictions", {
+            //     description: error instanceof Error ? error.message : "Unknown error"
+            // });
         } finally {
-            setIsGenerating(false);
+            setIsGenerating(false)  ;
         }
     }
 

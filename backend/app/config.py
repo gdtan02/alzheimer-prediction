@@ -11,11 +11,13 @@ class Config:
     DT_MODEL_PATH = os.path.join(MODEL_DIR, "decision_tree_model.pkl")
 
     # ML pipeline settings
-    RANDOM_STATE = 42
+    RANDOM_STATE = 1
     TEST_SIZE = 0.2
     CV_SPLITS = 3
 
     # Feature configuration
+    FEATURES = ['AGE', 'EDUC', 'UDSBENTC', 'SEX', 'MOCATRAI', 'AMNDEM', 'NACCPPAG', 'AMYLPET', 'DYSILL', 'DYSILLIF']
+    FEATURES_WITH_TARGET = ['AGE', 'EDUC', 'UDSBENTC', 'SEX', 'MOCATRAI', 'AMNDEM', 'NACCPPAG', 'AMYLPET', 'DYSILL', 'DYSILLIF', 'NACCUDSD']
     NUMERICAL_FEATURES = ['AGE', 'EDUC', 'UDSBENTC']
     CATEGORICAL_FEATURES = ['SEX', 'MOCATRAI', 'AMNDEM', 'NACCPPAG', 'AMYLPET', 'DYSILL', 'DYSILLIF']
     TARGET_COLUMN = 'NACCUDSD'
