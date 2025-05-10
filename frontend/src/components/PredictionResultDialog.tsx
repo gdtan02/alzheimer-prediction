@@ -2,12 +2,10 @@ import React, { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts"
-import { PredictionResult, TrainingResult } from "@/services/predictionService";
-import { Badge } from "./ui/badge";
+import { Pie, PieChart, Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis, Cell } from "recharts"
+import { PredictionResult } from "@/services/predictionService";
 import { ScrollArea } from "./ui/scroll-area";
-import { Progress } from "./ui/progress";
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
 
@@ -19,20 +17,63 @@ const CLASS_LABELS = {
     4: "Dementia",
 };
 
+const CLASS_COLORS = {
+    1: "#0088FE", // Blue
+    2: "#00C49F", // Green
+    3: "#FFBB28", // Yellow
+    4: "#FF8042", // Orange
+};
+
+const AGE_GROUPS = [
+    { label: "Below 60", min: 0, max: 59 },
+    { label: "60-69", min: 60, max: 69 },
+    { label: "70-79", min: 70, max: 79 },
+    { label: "80 or above", min: 80, max: Infinity },
+];
+
+
+const AGE_GROUP_COLORS = ['#16a34a', '#22c55e', '#4ade80', '#86efac']
 
 // Props for dialog component
 interface PredictionResultDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     results: PredictionResult[] | null;
-    modelMetrics?: {
-        f1Score: number;
-        accuracy: number;
-        precision: number;
-        recall: number;
-    }
+}
+// Chart data interfaces
+interface BarChartDataItem {
+    category: string;
+    count: number;
+    fill?: string;
 }
 
+interface NaccuDsdDetailedBreakdown {
+    classLabel: string;
+    naccudsdValue: number;
+    sexDistribution: BarChartDataItem[];
+    ageGroupDistribution: BarChartDataItem[];
+}
+
+const chartConfig = {
+    class1: {
+      label: "Normal Cognition",
+      color: "#0088FE",
+    },
+    class2: {
+      label: "Cognitively Impaired, but not MCI",
+      color: "#00C49F",
+    },
+    class3: {
+      label: "Either amnestic or non-amnestic MCI",
+      color: "#FFBB28",
+    },
+    class4: {
+      label: "Dementia",
+      color: "#FF8042",
+    }
+  };
+
+// Helper function to get alzheimer class label and color
 const getAlzheimerClassLabel = (code: number): string => {
     switch (code) {
         case 1:
@@ -48,27 +89,12 @@ const getAlzheimerClassLabel = (code: number): string => {
     }
 };
 
-const chartConfig = {
-  class1: {
-    label: "Normal Cognition",
-    color: "#0088FE",
-  },
-  class2: {
-    label: "Cognitively Impaired, but not MCI",
-    color: "#00C49F",
-  },
-  class3: {
-    label: "Either amnestic or non-amnestic MCI",
-    color: "#FFBB28",
-  },
-  class4: {
-    label: "Dementia",
-    color: "#FF8042",
-  }
+const getAlzheimerClassColor = (code: number): string => {
+    return CLASS_COLORS[code as keyof typeof CLASS_COLORS] || "#CCCCCC";
 };
 
 
-const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen, onOpenChange, results, modelMetrics }) => {
+const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen, onOpenChange, results }) => {
 
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -85,12 +111,61 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
             }
         });
         
+        const total = distribution.reduce((sum, count) => sum + count, 0);
+        
         return [
-            { name: CLASS_LABELS[1], value: distribution[0] },
-            { name: CLASS_LABELS[2], value: distribution[1] },
-            { name: CLASS_LABELS[3], value: distribution[2] },
-            { name: CLASS_LABELS[4], value: distribution[3] }
+            { name: CLASS_LABELS[1], value: distribution[0], percentage: (distribution[0] / total) * 100, fill: CLASS_COLORS[1] },
+            { name: CLASS_LABELS[2], value: distribution[1], percentage: (distribution[1] / total) * 100, fill: CLASS_COLORS[2] },
+            { name: CLASS_LABELS[3], value: distribution[2], percentage: (distribution[2] / total) * 100, fill: CLASS_COLORS[3] },
+            { name: CLASS_LABELS[4], value: distribution[3], percentage: (distribution[3] / total) * 100, fill: CLASS_COLORS[4] }
         ];
+    }, [results]);
+
+    // Calculate demographic breakdowns by class
+    const demographicBreakdowns = useMemo(() => {
+        if (!results || results.length === 0) return [];
+        
+        // Create an array to store breakdown objects for each NACCUDSD class
+        const breakdowns: NaccuDsdDetailedBreakdown[] = [];
+        
+        // For each class (1-4), create a breakdown
+        for (let classValue = 1; classValue <= 4; classValue++) {
+            // Filter patients by this class
+            const patientsInClass = results.filter(p => p.NACCUDSD === classValue);
+            
+            if (patientsInClass.length === 0) continue;
+            
+            // Sex distribution
+            const maleCount = patientsInClass.filter(p => p.SEX === 1).length;
+            const femaleCount = patientsInClass.filter(p => p.SEX === 2).length;
+            
+            const sexDistribution = [
+                { category: "Male", count: maleCount, fill: "#16a34a" },
+                { category: "Female", count: femaleCount, fill: "#4ade80" }
+            ];
+            
+            // Age group distribution
+            const ageGroups = AGE_GROUPS.map((group, index) => {
+                const count = patientsInClass.filter(
+                    p => p.AGE !== undefined && p.AGE >= group.min && p.AGE <= group.max
+                ).length;
+                
+                return {
+                    category: group.label,
+                    count,
+                    fill: AGE_GROUP_COLORS[index % AGE_GROUP_COLORS.length]
+                };
+            });
+            
+            breakdowns.push({
+                classLabel: getAlzheimerClassLabel(classValue),
+                naccudsdValue: classValue,
+                sexDistribution,
+                ageGroupDistribution: ageGroups
+            });
+        }
+        
+        return breakdowns;
     }, [results]);
 
     if (!results) {
@@ -111,10 +186,6 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const paginatedResults = results.slice(startIndex, startIndex + ITEMS_PER_PAGE);
     
-    const formatPercentage = (value: number): string => {
-        return `${(value * 100).toFixed(2)}%`;
-    };
-
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             {/* Results generated */}
@@ -131,6 +202,7 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                     </TabsList>
                     
                     <ScrollArea className="max-h-[70vh]">
+                        {/* Results */}
                         <TabsContent value="results" className="space-y-4">
                             <Card>
                                 <CardHeader>
@@ -182,16 +254,99 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                                 </CardContent>
                             </Card>
                         </TabsContent>
-
+                        {/* Analysis */}
                         <TabsContent value="analysis" className="space-y-6">
                             <Card>
                                 <CardHeader className="pb-2">
-                                    <CardTitle>Model Performance</CardTitle>
+                                    <CardTitle>Overall Distribution</CardTitle>
                                     <CardDescription>
-                                        Metrics for the prediction model
+                                        Distribution of Alzheimer's disease classes across all patients
                                     </CardDescription>
                                 </CardHeader>
+                                <CardContent>
+                                    <div className="w-full flex justify-center items-center">
+                                        {/* Pie chart */}
+                                        <ChartContainer className="w-full max-w-lg min-w-[600px]" config={chartConfig}>
+                                            {/* <ResponsiveContainer width="100%" height="100%"> */}
+                                            <PieChart>
+                                                <ChartTooltip
+                                                    cursor={false}
+                                                    content={<ChartTooltipContent hideLabel />}
+                                                />
+                                                <Pie
+                                                    data={classDistribution}
+                                                    labelLine={true}
+                                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                                                    outerRadius={80}
+                                                    dataKey="value"
+                                                >
+                                                    {classDistribution.map((entry, index) => (
+                                                        <Cell key={`cell-${index}`} fill={entry.fill} />
+                                                    ))}
+                                                </Pie>
+                                                <Legend />
+                                            </PieChart>
+                                            {/* </ResponsiveContainer> */}
+                                        </ChartContainer>
+
+
+                                    </div>
+                                </CardContent>
                             </Card>
+
+                            {/* Demographic Breakdowns for each class */}
+                            {demographicBreakdowns.map((breakdown) => (
+                                <Card key={breakdown.naccudsdValue}>
+                                    <CardHeader>
+                                        <div className="flex items-center gap-2">
+                                            <div 
+                                                className="w-4 h-4 rounded-full" 
+                                                style={{ backgroundColor: getAlzheimerClassColor(breakdown.naccudsdValue) }}
+                                            ></div>
+                                            <CardTitle>{breakdown.classLabel} - Demographic Breakdown</CardTitle>
+                                        </div>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {/* Sex Distribution */}
+                                            <div>
+                                                <h4 className="font-semibold mb-4">Sex Distribution</h4>
+                                                <div className="h-64">
+                                                    <ChartContainer config={chartConfig}>
+                                                        <BarChart data={breakdown.sexDistribution}>
+                                                            <CartesianGrid strokeDasharray="3 3" />
+                                                            <XAxis dataKey="category" tickMargin={10} />
+                                                            <YAxis tickLine={true} />
+                                                            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed"/>} />
+                                                            <Bar dataKey="count" radius={4}>
+                                                                {breakdown.sexDistribution.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                                                ))}
+                                                            </Bar>
+                                                        </BarChart>
+                                                    </ChartContainer>
+                                                </div>
+                                            </div>
+
+                                            {/* Age Group Distribution */}
+                                            <div>
+                                                <h4 className="font-semibold mb-4">Age Group Distribution</h4>
+                                                <div className="h-64">
+                                                    <ChartContainer config={chartConfig}>
+                                                        <BarChart data={breakdown.ageGroupDistribution}>
+                                                            <CartesianGrid strokeDasharray="3 3" />
+                                                            <XAxis dataKey="category" tickMargin={10} />
+                                                            <YAxis tickLine={true} />
+                                                            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed"/>} />
+                                                            <Bar dataKey="count" radius={4} />
+                                                        </BarChart>
+                                                    </ChartContainer>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
                         </TabsContent>
                     </ScrollArea>
                 </Tabs>

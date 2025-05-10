@@ -32,6 +32,8 @@ export interface TrainingResult {
 // Prediction results
 export interface PredictionResult {
   NACCID: string;
+  AGE: number;
+  SEX: number;
   NACCUDSD: number;
 }
 
