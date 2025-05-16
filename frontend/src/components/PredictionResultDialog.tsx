@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Pie, PieChart, Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis, Cell } from "recharts"
 import { PredictionResult } from "@/services/predictionService";
 import { ScrollArea } from "./ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
+import { VisualizationResult } from "@/types/visualization";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 50;
 const CLASS_LABELS = {
     1: "Normal Cognition",
     2: "Cognitively Impaired, but not MCI",
@@ -39,6 +40,7 @@ interface PredictionResultDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     results: PredictionResult[] | null;
+    visualizations: VisualizationResult[] | null;
 }
 // Chart data interfaces
 interface BarChartDataItem {
@@ -94,7 +96,7 @@ const getAlzheimerClassColor = (code: number): string => {
 };
 
 
-const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen, onOpenChange, results }) => {
+const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen, onOpenChange, results, visualizations }) => {
 
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -219,6 +221,7 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                                                 <TableHead>NACCUDSD Class</TableHead>
                                             </TableRow>
                                         </TableHeader>
+                                    
                                         <TableBody>
                                             {paginatedResults.map((result) => (
                                                 <TableRow key={result.NACCID}>
@@ -347,6 +350,35 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                                     </CardContent>
                                 </Card>
                             ))}
+
+                            {/* Visualizations */}
+                            {visualizations && visualizations.length > 0 && (
+                                <div className="space-y-6 pt-6">
+                                <h3 className="text-xl font-semibold text-center mb-4">Data Visualizations</h3> 
+                                {visualizations.map((viz) => (
+                                    <Card key={viz.name}>
+                                        <CardHeader>
+                                            <CardTitle className="text-center">{viz.label}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="flex flex-col items-center">
+                                            {viz.error ? (
+                                                <p className="text-red-500">
+                                                    Could not load visualization: {viz.error}
+                                                </p>
+                                            ) : viz.imageUrl ? (
+                                                <img 
+                                                    src={viz.imageUrl} 
+                                                    alt={viz.label} 
+                                                    className="rounded-md border w-full max-w-2xl h-auto" // Added max-width
+                                                />
+                                            ) : (
+                                                <p className="text-muted-foreground">Visualization data not available.</p>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                            )}
                         </TabsContent>
                     </ScrollArea>
                 </Tabs>

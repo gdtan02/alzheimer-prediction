@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +10,8 @@ import FileUploadSection from "../FileUploadSection";
 import { Button } from "../ui/button";
 import PredictionResultDialog from "../PredictionResultDialog";
 import { toast } from "sonner";
+import { VisualizationResult } from "@/types/visualization";
+import { VisualizationService } from "@/services/visualizationService";
 
 const formSchema = z.object({
     datasetFile: z.string()
@@ -21,11 +23,22 @@ const DatasetUploadForm = () => {
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
     const [isResultDialogOpen, setIsResultDialogOpen] = useState<boolean>(false);
     const [predictionResult, setPredictionResult] = useState<PredictionResult[] | null>(null);
+    const [visualizations, setVisualizations] = useState<VisualizationResult[] | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     });
+
+    // Cleaning up visualization Object URLs
+    useEffect(() => {
+        const currentVisualizations = visualizations;
+        return () => {
+            if (currentVisualizations) {
+                VisualizationService.cleanupVisualizationUrls(currentVisualizations);
+            }
+        };
+    }, [visualizations]);
 
     function handleFileUpload(files: File[] | null) {
 
@@ -63,6 +76,10 @@ const DatasetUploadForm = () => {
 
         setIsGenerating(true);
 
+        // Cleanup previous prediction results and visualizations
+        setPredictionResult(null);
+        setVisualizations(null);
+
         try {
             // Validate CSV structure
             const isValid = await PredictionService.validateCsvFile(file, false);
@@ -73,14 +90,32 @@ const DatasetUploadForm = () => {
                 return;
             }
 
-            const result = await PredictionService.predictFromCSV(file);
+            const [predictionOutcome, visualizationOutcome] = await Promise.allSettled([
+                PredictionService.predictFromCSV(file),
+                VisualizationService.generateAllVisualizations(file)
+            ]);
 
-            console.log("results=", result)
+            // Process prediction results
+            if (predictionOutcome.status === 'fulfilled') {
+                setPredictionResult(predictionOutcome.value);
+                
+            } else {
+                console.error("Prediction generation error: ", predictionOutcome.reason);
+                throw Error("Failed to generate prediction results.")
+            }
 
-            setPredictionResult(result);
+            // Process visualization results
+            if (visualizationOutcome.status === 'fulfilled') {
+                setVisualizations(visualizationOutcome.value);
+                
+            } else {
+                console.error("Visualization generation error: ", visualizationOutcome.reason);
+                throw Error("Visualizations generation process failed");
+            }
 
-            // Show success message
-            toast.success("Predicted successfully. View the results in the table.");
+            toast.success("Predictions are completed.", { description: "Click 'View Results' to view the prediction and visualization results."})
+        
+
         } catch (error) {
             console.log("Prediction error: ", error);
             toast.error("Failed to make predictions", {
@@ -132,6 +167,7 @@ const DatasetUploadForm = () => {
                 isOpen={isResultDialogOpen}
                 onOpenChange={setIsResultDialogOpen}
                 results={predictionResult}
+                visualizations={visualizations}
             />
         </Card>        
     )

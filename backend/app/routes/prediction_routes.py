@@ -4,16 +4,14 @@ import pandas as pd
 import io
 
 from app.core.exceptions import ModelTrainingError, DataValidationError, PredictionError
-from app.pipeline import Predictor
-from app.schemas import TrainResult, Metrics, PredictionResult
 from app.services.prediction_service import PredictionService
 
-route_bp = Blueprint('router', __name__)
+prediction_bp = Blueprint('prediction', __name__)
 
 # Create services
 prediction_service = PredictionService()
 
-@route_bp.route('/train', methods=["POST"])
+@prediction_bp.route('/train', methods=["POST"])
 def train_models():
     try:
         if "file" not in request.files:
@@ -59,7 +57,7 @@ def train_models():
         }), 500
     
 
-@route_bp.route("/predict/batch", methods=["POST"])
+@prediction_bp.route("/predict/batch", methods=["POST"])
 def predict_batch():
     """Predict for multiple patients using CSV file."""
     try:
@@ -100,7 +98,7 @@ def predict_batch():
             "error": "An unexpected server error occurred."
         }), 500
 
-@route_bp.route("/predict/single", methods=["POST"])
+@prediction_bp.route("/predict/single", methods=["POST"])
 def predict_single_patient():
     """Predict for a single patient using form data"""
     try:
