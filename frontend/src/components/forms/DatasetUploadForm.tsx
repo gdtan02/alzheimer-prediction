@@ -6,9 +6,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui
 import { Form } from "../ui/form";
 
 import { PredictionResult, PredictionService } from '@/services/predictionService';
-import FileUploadSection from "../FileUploadSection";
+import FileUploadSection from "../common/FileUploadSection";
 import { Button } from "../ui/button";
-import PredictionResultDialog from "../PredictionResultDialog";
+import PredictionResultDialog from "../results/PredictionResultDialog";
 import { toast } from "sonner";
 import { VisualizationResult } from "@/types/visualization";
 import { VisualizationService } from "@/services/visualizationService";

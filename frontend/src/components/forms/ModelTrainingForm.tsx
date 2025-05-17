@@ -7,8 +7,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui
 import { Form } from "../ui/form";
 
 import { PredictionService, TrainingResult } from "@/services/predictionService";
-import TrainResultDialog from "../TrainResultDialog";
-import FileUploadSection from "../FileUploadSection";
+import TrainResultDialog from "../results/TrainResultDialog";
+import FileUploadSection from "../common/FileUploadSection";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 
