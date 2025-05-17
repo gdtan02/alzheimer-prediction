@@ -137,8 +137,9 @@ const TrainResultDialog: React.FC<TrainResultsDialogProps> = ({ isOpen, onOpenCh
                                 <CardDescription>Performance metrics across all models</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="w-full">
-                                    <ChartContainer config={chartConfig}>
+                                
+                                <div className="w-full flex justify-center items-center">
+                                    <ChartContainer className="w-4/5 max-w-4/5 min-w-[200px]" config={chartConfig}>
                                         <BarChart
                                             accessibilityLayer
                                             data={prepareChartData()}
