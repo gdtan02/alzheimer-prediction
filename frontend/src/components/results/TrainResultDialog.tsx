@@ -1,11 +1,11 @@
 import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts"
 import { TrainingResult } from "@/services/predictionService";
-import { Badge } from "./ui/badge";
-import { ScrollArea } from "./ui/scroll-area";
+import { Badge } from "../ui/badge";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface TrainResultsDialogProps {
   isOpen: boolean;
@@ -104,10 +104,31 @@ const TrainResultDialog: React.FC<TrainResultsDialogProps> = ({ isOpen, onOpenCh
                                         <h3 className="font-bold text-lg">{formatModelName(result.bestModel)}</h3>
                                         <p className="text-muted-foreground">F1 Score: {formatPercentage(result.models[result.bestModel].f1Score)}</p>
                                     </div>
-                                    <Badge variant="outline" className="bg-primary/10">Recommended</Badge>
+                                    <Badge variant="outline" className="bg-primary/30">Recommended</Badge>
                                 </div>
                             </CardContent>
                         </Card>
+
+                        {/* Detailed Metrics */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
+                            {Object.entries(result.models).map(([model, metrics]) => (
+                                <Card key={model}>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm">{formatModelName(model)}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <dl className="space-y-2 text-sm">
+                                            {Object.entries(metrics).map(([metric, value]) => (
+                                                <div key={metric} className="flex justify-between">
+                                                    <dt className="text-muted-foreground">{formatMetricName(metric)}</dt>
+                                                    <dd className="font-medium">{formatPercentage(value)}</dd>
+                                                </div>
+                                            ))}
+                                        </dl>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
 
                         {/* Models Comparison Chart */}
                         <Card>
@@ -136,27 +157,6 @@ const TrainResultDialog: React.FC<TrainResultsDialogProps> = ({ isOpen, onOpenCh
                                 </div>
                             </CardContent>
                         </Card>
-
-                        {/* Detailed Metrics */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                            {Object.entries(result.models).map(([model, metrics]) => (
-                                <Card key={model}>
-                                    <CardHeader className="pb-2">
-                                        <CardTitle className="text-sm">{formatModelName(model)}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <dl className="space-y-2 text-sm">
-                                            {Object.entries(metrics).map(([metric, value]) => (
-                                                <div key={metric} className="flex justify-between">
-                                                    <dt className="text-muted-foreground">{formatMetricName(metric)}</dt>
-                                                    <dd className="font-medium">{formatPercentage(value)}</dd>
-                                                </div>
-                                            ))}
-                                        </dl>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
                     </ScrollArea>
                 </DialogContent>
             </Dialog>
