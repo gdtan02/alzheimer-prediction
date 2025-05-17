@@ -1,11 +1,11 @@
 import React from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis } from "recharts"
 import { TrainingResult } from "@/services/predictionService";
-import { Badge } from "./ui/badge";
-import { ScrollArea } from "./ui/scroll-area";
+import { Badge } from "../ui/badge";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface TrainResultsDialogProps {
   isOpen: boolean;
@@ -104,41 +104,13 @@ const TrainResultDialog: React.FC<TrainResultsDialogProps> = ({ isOpen, onOpenCh
                                         <h3 className="font-bold text-lg">{formatModelName(result.bestModel)}</h3>
                                         <p className="text-muted-foreground">F1 Score: {formatPercentage(result.models[result.bestModel].f1Score)}</p>
                                     </div>
-                                    <Badge variant="outline" className="bg-primary/10">Recommended</Badge>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Models Comparison Chart */}
-                        <Card>
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-lg">Model Comparison</CardTitle>
-                                <CardDescription>Performance metrics across all models</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="w-full">
-                                    <ChartContainer config={chartConfig}>
-                                        <BarChart
-                                            accessibilityLayer
-                                            data={prepareChartData()}
-                                            >
-                                            <Legend />
-                                            <CartesianGrid vertical={false} />
-                                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
-                                            <YAxis domain={[0, 1]} tickLine={true} tickFormatter={(value) => `${(value * 100)}%`} />
-                                            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />}/>
-                                            {/* <Legend /> */}
-                                            <Bar dataKey="SVM" fill="var(--color-svm)" radius={4} />
-                                            <Bar dataKey="Naive Bayes" fill="var(--color-naiveBayes)" radius={4} />
-                                            <Bar dataKey="Decision Tree" fill="var(--color-decisionTree)" radius={4} />
-                                        </BarChart>
-                                    </ChartContainer>
+                                    <Badge variant="outline" className="bg-primary/30">Recommended</Badge>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Detailed Metrics */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-4">
                             {Object.entries(result.models).map(([model, metrics]) => (
                                 <Card key={model}>
                                     <CardHeader className="pb-2">
@@ -157,6 +129,35 @@ const TrainResultDialog: React.FC<TrainResultsDialogProps> = ({ isOpen, onOpenCh
                                 </Card>
                             ))}
                         </div>
+
+                        {/* Models Comparison Chart */}
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-lg">Model Comparison</CardTitle>
+                                <CardDescription>Performance metrics across all models</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                
+                                <div className="w-full flex justify-center items-center">
+                                    <ChartContainer className="w-4/5 max-w-4/5 min-w-[200px]" config={chartConfig}>
+                                        <BarChart
+                                            accessibilityLayer
+                                            data={prepareChartData()}
+                                            >
+                                            <Legend />
+                                            <CartesianGrid vertical={false} />
+                                            <XAxis dataKey="name" tickLine={false} tickMargin={10} axisLine={false} />
+                                            <YAxis domain={[0, 1]} tickLine={true} tickFormatter={(value) => `${(value * 100)}%`} />
+                                            <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />}/>
+                                            {/* <Legend /> */}
+                                            <Bar dataKey="SVM" fill="var(--color-svm)" radius={4} />
+                                            <Bar dataKey="Naive Bayes" fill="var(--color-naiveBayes)" radius={4} />
+                                            <Bar dataKey="Decision Tree" fill="var(--color-decisionTree)" radius={4} />
+                                        </BarChart>
+                                    </ChartContainer>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </ScrollArea>
                 </DialogContent>
             </Dialog>

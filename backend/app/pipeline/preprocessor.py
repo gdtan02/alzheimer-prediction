@@ -207,11 +207,12 @@ class DataPreprocessor:
                     invalid_mask = (df[col] < min_val) | (df[col] > max_val)
                     if invalid_mask.any():
                         df.loc[invalid_mask, col] = df.loc[invalid_mask, col].clip(min_val, max_val)
-                else:  # Categorical
-                    invalid_mask = ~df[col].isin(allowed_values)
-                    if invalid_mask.any():
-                        mode_value = df.loc[~invalid_mask, col].mode(dropna=True)[0]
-                        df.loc[invalid_mask, col] = mode_value
+                # else:  # Categorical
+                    # invalid_mask = ~df[col].isin(allowed_values)
+                    # print("CATEgorical=", invalid_mask)
+                    # if invalid_mask.any():
+                    #     mode_value = df.loc[~invalid_mask, col].mode(dropna=True)[0]
+                    #     df.loc[invalid_mask, col] = mode_value
 
         return df
     

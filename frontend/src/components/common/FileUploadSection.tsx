@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { Control } from "react-hook-form";
-import { FormControl, FormField, FormItem, FormMessage } from "./ui/form";
+import { FormControl, FormField, FormItem, FormMessage } from "../ui/form";
 import { CloudUpload, Paperclip } from "lucide-react";
-import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from "./ui/file-upload";
+import { FileInput, FileUploader, FileUploaderContent, FileUploaderItem } from "../ui/file-upload";
 
 interface FileUploadSectionProps {
     onFileUpload: (files: File[] | null) => void;

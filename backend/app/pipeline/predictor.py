@@ -103,3 +103,20 @@ class Predictor:
         except Exception as e:
             raise PredictionError(f"Error making prediction: {str(e)}")
 
+    def get_prediction_results(self, X):
+        """Predict from CSV"""
+        try:
+            # Ensure models are loaded
+            if not self.models or not self.best_model_name or not self.best_model_name not in self.models:
+                self.load_models()
+
+            if not self.best_model:
+                raise PredictionError(f"Fail to make predictions. The best model is not configured.")
+
+            # Make predictions
+            predictions = self.best_model.predict(X)
+
+            return pd.Series(predictions, index=X.index)
+
+        except Exception as e:
+            raise PredictionError(f"Error making prediction: {str(e)}")

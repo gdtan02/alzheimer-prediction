@@ -4,7 +4,7 @@ import logging
 import os
 
 from app.config import Config
-from app.routes import route_bp
+from app.routes import prediction_bp, visualization_bp
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -14,6 +14,8 @@ def create_app(config_class=Config):
     CORS(app)
 
     # Register blueprints
-    app.register_blueprint(route_bp, url_prefix="/api")
+    app.register_blueprint(prediction_bp, url_prefix="/api")
+
+    app.register_blueprint(visualization_bp, url_prefix="/api/visualizations")
 
     return app
