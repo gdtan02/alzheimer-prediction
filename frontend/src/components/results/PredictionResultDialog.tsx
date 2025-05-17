@@ -1,15 +1,16 @@
 import React, { useMemo, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "./ui/dialog";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "./ui/card";
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Pie, PieChart, Bar, BarChart, CartesianGrid, Legend, XAxis, YAxis, Cell } from "recharts"
 import { PredictionResult } from "@/services/predictionService";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from "../ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
-import { Button } from "./ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Button } from "../ui/button";
+import { VisualizationResult } from "@/types/visualization";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 50;
 const CLASS_LABELS = {
     1: "Normal Cognition",
     2: "Cognitively Impaired, but not MCI",
@@ -18,10 +19,10 @@ const CLASS_LABELS = {
 };
 
 const CLASS_COLORS = {
-    1: "#0088FE", // Blue
-    2: "#00C49F", // Green
-    3: "#FFBB28", // Yellow
-    4: "#FF8042", // Orange
+    1: ["#3b82fE", "#60a5fa", "#93c5fd", "#bfdbfe"], // Blue
+    2: ["#10b981", "#34d399", "#6ee7b7", "#a7f3d0"], // Green
+    3: ["#eab308", "#facc15", "#fde047", "#fef08a"], // Yellow
+    4: ["#ef4444", "#f87171", "#fca5a5", "#fecaca"], // Orange
 };
 
 const AGE_GROUPS = [
@@ -32,13 +33,12 @@ const AGE_GROUPS = [
 ];
 
 
-const AGE_GROUP_COLORS = ['#16a34a', '#22c55e', '#4ade80', '#86efac']
-
 // Props for dialog component
 interface PredictionResultDialogProps {
     isOpen: boolean;
     onOpenChange: (open: boolean) => void;
     results: PredictionResult[] | null;
+    visualizations: VisualizationResult[] | null;
 }
 // Chart data interfaces
 interface BarChartDataItem {
@@ -57,19 +57,19 @@ interface NaccuDsdDetailedBreakdown {
 const chartConfig = {
     class1: {
       label: "Normal Cognition",
-      color: "#0088FE",
+      color: "#3b82fE",
     },
     class2: {
       label: "Cognitively Impaired, but not MCI",
-      color: "#00C49F",
+      color: "#10b981",
     },
     class3: {
       label: "Either amnestic or non-amnestic MCI",
-      color: "#FFBB28",
+      color: "#eab308",
     },
     class4: {
       label: "Dementia",
-      color: "#FF8042",
+      color: "#ef4444",
     }
   };
 
@@ -90,11 +90,11 @@ const getAlzheimerClassLabel = (code: number): string => {
 };
 
 const getAlzheimerClassColor = (code: number): string => {
-    return CLASS_COLORS[code as keyof typeof CLASS_COLORS] || "#CCCCCC";
+    return CLASS_COLORS[code as keyof typeof CLASS_COLORS][0] || "#CCCCCC";
 };
 
 
-const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen, onOpenChange, results }) => {
+const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen, onOpenChange, results, visualizations }) => {
 
     const [currentPage, setCurrentPage] = useState(1);
 
@@ -114,10 +114,10 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
         const total = distribution.reduce((sum, count) => sum + count, 0);
         
         return [
-            { name: CLASS_LABELS[1], value: distribution[0], percentage: (distribution[0] / total) * 100, fill: CLASS_COLORS[1] },
-            { name: CLASS_LABELS[2], value: distribution[1], percentage: (distribution[1] / total) * 100, fill: CLASS_COLORS[2] },
-            { name: CLASS_LABELS[3], value: distribution[2], percentage: (distribution[2] / total) * 100, fill: CLASS_COLORS[3] },
-            { name: CLASS_LABELS[4], value: distribution[3], percentage: (distribution[3] / total) * 100, fill: CLASS_COLORS[4] }
+            { name: CLASS_LABELS[1], value: distribution[0], percentage: (distribution[0] / total) * 100, fill: CLASS_COLORS[1][0] },
+            { name: CLASS_LABELS[2], value: distribution[1], percentage: (distribution[1] / total) * 100, fill: CLASS_COLORS[2][0] },
+            { name: CLASS_LABELS[3], value: distribution[2], percentage: (distribution[2] / total) * 100, fill: CLASS_COLORS[3][0] },
+            { name: CLASS_LABELS[4], value: distribution[3], percentage: (distribution[3] / total) * 100, fill: CLASS_COLORS[4][0] }
         ];
     }, [results]);
 
@@ -138,10 +138,12 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
             // Sex distribution
             const maleCount = patientsInClass.filter(p => p.SEX === 1).length;
             const femaleCount = patientsInClass.filter(p => p.SEX === 2).length;
+
+            const classColor = CLASS_COLORS[classValue as keyof typeof CLASS_COLORS]
             
             const sexDistribution = [
-                { category: "Male", count: maleCount, fill: "#16a34a" },
-                { category: "Female", count: femaleCount, fill: "#4ade80" }
+                { category: "Male", count: maleCount, fill: classColor[0] },
+                { category: "Female", count: femaleCount, fill: classColor[1] }
             ];
             
             // Age group distribution
@@ -153,7 +155,7 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                 return {
                     category: group.label,
                     count,
-                    fill: AGE_GROUP_COLORS[index % AGE_GROUP_COLORS.length]
+                    fill: classColor[index % classColor.length]
                 };
             });
             
@@ -219,6 +221,7 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                                                 <TableHead>NACCUDSD Class</TableHead>
                                             </TableRow>
                                         </TableHeader>
+                                    
                                         <TableBody>
                                             {paginatedResults.map((result) => (
                                                 <TableRow key={result.NACCID}>
@@ -347,6 +350,35 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                                     </CardContent>
                                 </Card>
                             ))}
+
+                            {/* Visualizations */}
+                            {visualizations && visualizations.length > 0 && (
+                                <div className="space-y-6 pt-6">
+                                <h3 className="text-xl font-semibold text-center mb-4">Data Visualizations</h3> 
+                                {visualizations.map((viz) => (
+                                    <Card key={viz.name}>
+                                        <CardHeader>
+                                            <CardTitle className="text-center">{viz.label}</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="flex flex-col items-center">
+                                            {viz.error ? (
+                                                <p className="text-red-500">
+                                                    Could not load visualization: {viz.error}
+                                                </p>
+                                            ) : viz.imageUrl ? (
+                                                <img 
+                                                    src={viz.imageUrl} 
+                                                    alt={viz.label} 
+                                                    className="rounded-md border w-full max-w-2xl h-auto" // Added max-width
+                                                />
+                                            ) : (
+                                                <p className="text-muted-foreground">Visualization data not available.</p>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                            )}
                         </TabsContent>
                     </ScrollArea>
                 </Tabs>
