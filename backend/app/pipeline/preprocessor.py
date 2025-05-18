@@ -287,7 +287,7 @@ class DataPreprocessor:
         if self.cat_features:
             preprocessor_steps.append(("cat", Pipeline(steps=[
                 ("mode_imputer", SimpleImputer(strategy="most_frequent")),
-                ("onehot", OneHotEncoder(handle_unknown="ignore"))
+                # ("onehot", OneHotEncoder(handle_unknown="ignore"))
             ]), self.cat_features))
 
         

@@ -66,7 +66,7 @@ class Predictor:
             result: PredictionResult = PredictionResult(
                 NACCID=str(X.index[0]),
                 AGE=int(X["AGE"][0]),
-                SEX=int(1 if X["SEX_1.0"][0] == 1 else 2),
+                SEX=int(X["SEX"][0]),
                 NACCUDSD=int(prediction)
             )
 
@@ -93,7 +93,7 @@ class Predictor:
                 result = PredictionResult(
                     NACCID=str(X.index[idx]),
                     AGE=int(X["AGE"][idx]),
-                    SEX=int(1 if X['SEX_1.0'][idx] == 1 else 2),
+                    SEX=int(X['SEX'][idx]),
                     NACCUDSD=int(prediction)
                 ).model_dump()
                 results.append(result)

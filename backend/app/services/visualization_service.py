@@ -409,7 +409,7 @@ class VisualizationService:
                     plotted_count += 1
 
                 except Exception as e:
-                    print(f"Error plotting '{cat_key}': {e}")
+                    print(f"Error plotting '{cat_key}'. Please inspect your dataset.\nError details: {e}")
                     # Add an error message to the subplot instead
                     fig, ax = plt.subplots(figsize=(8, 6))
                     ax.text(0.5, 0.5, f"Error plotting: {e}", horizontalalignment='center', verticalalignment='center', color='red', fontsize=10, wrap=True)
