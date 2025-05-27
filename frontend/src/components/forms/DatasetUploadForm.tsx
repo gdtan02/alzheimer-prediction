@@ -12,12 +12,14 @@ import PredictionResultDialog from "../results/PredictionResultDialog";
 import { toast } from "sonner";
 import { VisualizationResult } from "@/types/visualization";
 import { VisualizationService } from "@/services/visualizationService";
+import { useAuth } from "@/stores/authStore";
 
 const formSchema = z.object({
     datasetFile: z.string()
 });
 
 const DatasetUploadForm = () => {
+    const { isAdmin } = useAuth();
     const [file, setFile] = useState<File | null>(null);
     const [isUploaded, setIsUploaded] = useState<boolean>(false);
     const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -92,7 +94,7 @@ const DatasetUploadForm = () => {
 
             const [predictionOutcome, visualizationOutcome] = await Promise.allSettled([
                 PredictionService.predictFromCSV(file),
-                VisualizationService.generateAllVisualizations(file)
+                VisualizationService.generateAllVisualizations(file, isAdmin)
             ]);
 
             // Process prediction results

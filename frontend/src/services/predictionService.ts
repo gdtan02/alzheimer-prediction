@@ -112,7 +112,6 @@ export const PredictionService = {
         });
       } catch (firestoreError) {
         console.error('Error saving to Firestore:', firestoreError);
-        // We don't throw here to avoid blocking the response to the user
       }
 
       return results.data;
@@ -151,6 +150,16 @@ export const PredictionService = {
       }
 
       const results = await response.json();
+
+      // Save to Firestore
+      try {
+        await addDoc(collection(db, 'predictions', ), {
+          ...results.data,
+          timestamp: new Date()
+        });
+      } catch (firestoreError) {
+        console.error('Error saving to Firestore:', firestoreError);
+      }
 
       return results.data;
     } catch (error) {

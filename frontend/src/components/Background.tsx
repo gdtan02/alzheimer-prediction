@@ -9,7 +9,7 @@ const PageBackground: React.FC<PageBackgroundProps> = ({children}) => {
         <div
             className="min-h-screen w-full bg-cover bg-center"
             style={{
-                backgroundImage: `url("src/assets/health-and-wellness.jpg")`,
+                backgroundImage: `url("src/assets/background.png")`,
                 position: "relative",
             }}
         >
