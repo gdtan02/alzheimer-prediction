@@ -359,6 +359,9 @@ const PredictionResultDialog: React.FC<PredictionResultDialogProps> = ({ isOpen,
                                     <Card key={viz.name}>
                                         <CardHeader>
                                             <CardTitle className="text-center">{viz.label}</CardTitle>
+                                            <CardDescription>
+                                                {viz.description != null ? viz.description: ""}
+                                            </CardDescription>
                                         </CardHeader>
                                         <CardContent className="flex flex-col items-center">
                                             {viz.error ? (

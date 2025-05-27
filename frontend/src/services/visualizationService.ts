@@ -8,12 +8,12 @@ const API_BASE_URL = "http://localhost:5000/api";
 
 // Visualization endpoints
 const VISUALIZATION_ENDPOINTS = [
-    { name: 'numerical_features_boxplot', label: 'Numerical Features Boxplot' },
-    { name: 'numerical_features_pairplot', label: 'Numerical Features Pairplot' },
-    { name: 'numerical_features_violin', label: 'Numerical Features Violin' },
-    { name: 'correlation_heatmap', label: "Correlation between Features" },
-    { name: 'categorical_vs_target', label: 'Categorical vs Target' },
-    { name: 'feature_importance', label: 'Feature Importance' }
+    { name: 'numerical_features_boxplot', label: 'Statistical Distribution of Age, Education, and Benson Figure by Cognitive Status', description: "This figure uses boxplots to show the distribution, median, and variability of three important numerical features across the same four cognitive status groups.", forAdmin: false },
+    { name: 'numerical_features_pairplot', label: 'Numerical Features Pairplot', description: null, forAdmin: true },
+    { name: 'numerical_features_violin', label: 'Comparative Analysis of Age, Education, and Benson Figure Scores by Cognitive Status', description: "The image displays violin plots showing the distribution of three important numerical clinical features such as Age, Years of Education, and Benson Figure Score, across different cognitive status categories. Each plot visualizes how the values for each feature are spread within each cognitive status group, while also highlighting the mean (yellow dot) and distribution shape of the data.", forAdmin: false },
+    { name: 'correlation_heatmap', label: "Correlation between Features", description: null, forAdmin: true },
+    { name: 'categorical_vs_target', label: 'Association of Key Clinical Features with Cognitive Status', description: "This chart displays how different categorical patient characteristics such as sex, amnestic dementia and amyloid PET relate to cognitive status. Each bar chart shows the proportion of patients within a category who fall into one of four cognitive status groups.", forAdmin: false },
+    { name: 'feature_importance', label: 'Feature Importance', description: null, forAdmin: true }
   ];
 
 export const VisualizationService = {
@@ -44,11 +44,20 @@ export const VisualizationService = {
       },
 
     // Generate all visualizations
-    async generateAllVisualizations(file: File): Promise<VisualizationResult[]> {
+    async generateAllVisualizations(file: File, isAdmin: boolean): Promise<VisualizationResult[]> {
         const results: VisualizationResult[] = [];
 
+        let viz_endpoint = VISUALIZATION_ENDPOINTS
+        if (!isAdmin) {
+            viz_endpoint = VISUALIZATION_ENDPOINTS.filter((endpoint) => {
+                if (!endpoint.forAdmin) {
+                    return endpoint
+                };
+            });
+        }
+
         // Make the requests
-        const promises = VISUALIZATION_ENDPOINTS.map(async (endpoint) => {
+        const promises = viz_endpoint.map(async (endpoint) => {
             try {
                 console.log(`Generating ${endpoint.label}...`);
 
@@ -76,6 +85,7 @@ export const VisualizationService = {
                     return {
                         name: endpoint.name,
                         label: endpoint.label,
+                        description: endpoint.description,
                         imageUrl,
                         error: ''
                     }
@@ -85,6 +95,7 @@ export const VisualizationService = {
                 return {
                     name: endpoint.name,
                     label: endpoint.label,
+                    description: null,
                     imageUrl: '',
                     error: error instanceof Error ? error.message : "Unknown error"
                 };

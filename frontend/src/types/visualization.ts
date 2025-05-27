@@ -8,6 +8,7 @@ export interface VisualizationResponse {
 export interface VisualizationResult {
     name: string;
     label: string;
+    description?: string | null;
     imageUrl: string;
     error?: string;
 }
